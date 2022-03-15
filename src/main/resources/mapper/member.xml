@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.eggTap.demo">
+
+	<select id="memberList" parameterType="map" resultType="map">
+		SELECT
+			MEM_UID,
+			MEM_NAME,
+			MEM_EMAIL,
+			MEM_BIRTHDAY,
+			MEM_HP,
+			MEM_LV,
+			MEM_EXP,
+			MEM_NICKNAME,
+			MEM_MANAGER
+		FROM myweb_member
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<choose>
+				<when test="mem_uid!=null">
+					mem_uid=#{mem_uid}
+				</when>
+				<when test="mem_name!=null">
+					And mem_name=#{mem_name}
+				</when>
+				<when test="mem_hp!=null">
+					And mem_hp=#{mem_hp}
+				</when>
+				<when test="mem_nickname!=null">
+					And mem_nickname=#{mem_nickname}
+				</when>
+				<when test="mem_email!=null">
+					And mem_email=#{mem_email}
+				</when>
+			</choose>
+		</trim>
+	</select>
+
+	<insert id="memberInsert" parameterType="map">
+		INSERT INTO
+		MYWEB_MEMBER(			
+			MEM_UID,
+			MEM_NAME,
+			MEM_EMAIL,
+			MEM_BIRTHDAY,
+			MEM_HP,
+			MEM_NICKNAME
+		)
+		VALUES(#{mem_uid},#{mem_name},#{mem_email},#{mem_birthday},
+		#{mem_hp},#{mem_nickname})
+	</insert>
+
+	<update id="memberUpdate" parameterType="map">
+		UPDATE 
+		MYWEB_MEMBER
+		SET
+		<trim suffixOverrides=",">
+			<choose>
+				<when test="mem_name!=null">
+					mem_name=#{mem_name},
+				</when>
+				<when test="mem_birthday!=null">
+					mem_birthday=#{mem_birthday},
+				</when>
+				<when test="mem_hp!=null">
+					mem_hp=#{mem_hp},
+				</when>
+				<when test="mem_lv!=null">
+					mem_lv=#{mem_lv},
+				</when>
+				<when test="mem_exp!=null">
+					mem_exp=#{mem_exp},
+				</when>
+				<when test="mem_nickname!=null">
+					mem_nickname=#{mem_nickname},
+				</when>
+				<when test="mem_manager!=null">
+					mem_manager=#{mem_manager},
+				</when>
+			</choose>
+		</trim>	
+		WHERE MEM_UID = #{mem_uid}
+	</update>
+
+	
+ 
+</mapper>

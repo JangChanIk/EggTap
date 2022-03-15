@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.mapper.BoardMapper">
+
+	<select id= "getBmGroup" parameterType="int" resultType="int">
+		SELECT NVL( (SELECT/*+index_desc(board_master_t i_group)*/ bm_no
+		FROM board_master_t
+		WHERE rownum = 1 and bm_group > 0),0)+1 bm_no FROM dual
+	</select>
+
+	<select id= "getBmNo" parameterType="int" resultType="int">
+		SELECT NVL( (SELECT/*+index_desc(board_master_t BM_NO_PK)*/ bm_no
+			FROM board_master_t
+			WHERE rownum = 1),0)+1 bm_no FROM dual
+	</select>
+	
+	<select id="bmStepUpdate" parameterType="map">
+		update board_master_t
+		set bm_step = bm_step+1
+		where bm_group =
+		#{bm_group} <!--화면에서 가져온 bm_group -->
+		<![CDATA[And bm_step > #{bm_group}]]> <!--화면에서 가져온 bm_step -->
+	</select>
+
+	<update id="boardUpdate" parameterType="map">
+		UPDATE board_master_t 
+		SET
+		bm_title = #{bm_title},
+		bm_writer =  #{bm_writer},
+		bm_content = #{bm_content},
+		bm_date = TO_CHAR(sysdate, 'YYYY-MM-DD'),
+		bm_pw =  #{bm_pw},
+		bm_email = #{bm_email}
+		where bm_no = #{bm_no}
+
+	</update>
+	
+
+	<select id="boardList" parameterType="map" resultType="map">
+		Select bm.BM_NO, bm_title,bm_writer,bm_date, bm_hit, bs_file
+		,bm.bm_group,bm.bm_pos,bm_step,bm_pw,bm_content,bm_email
+		From
+		board_master_t bm left join board_sub_t bs
+		on bm.bm_no = bs.bm_no
+		<if test='bm_no>0'>
+			WHERE bm.bm_no = #{bm_no}
+		</if>
+		<if test='cb_search != null and cb_search.equals("bm_title")'>
+			WHERE bm.bm_title like '%'||#{tb_search}||'%'
+		</if>
+		<if test='cb_search != null and cb_search.equals("bm_content")'>
+			WHERE bm.bm_content like '%'||#{tb_search}||'%'
+		</if>
+		<if test='cb_search != null and cb_search.equals("bm_writer")'>
+			WHERE bm.bm_writer like '%'||#{tb_search}||'%'
+		</if>
+
+		order by bm_group desc, bm_step asc
+	</select>
+
+
+	<insert id="boardInsert" parameterType="map">
+		INSERT INTO board_master_t
+		(bm_no, bm_title, bm_writer, bm_content
+		,bm_date, bm_pw, bm_email, bm_group, bm_pos, bm_step)
+		values(#{bm_no}, #{bm_title}, #{bm_writer}, #{bm_content}
+		,TO_CHAR(sysdate, 'YYYY-MM-DD'), #{bm_pw}, #{bm_email}
+		,#{bm_group},#{bm_pos},#{bm_step}
+		)
+	</insert>
+	
+	
+	<delete id="boardDelete" parameterType="map">
+		delete from board_master_t WHERE bm_no = #{bm_no}
+	</delete>
+
+
+
+</mapper>
+
+<!-- xml문서에서 > 크다라는 기호는 태그로 인식되므로 CDATA안에 작성하여 텍스트로 인식되도록 해주어야한다. -->
